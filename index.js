@@ -11,7 +11,7 @@ const bodyParser = require("body-parser");
 
 
 app.get("/", (req, res) => { 
-    res.send("server is running on port:-", process.env.PORT); 
+    res.send("server is running"); 
 }); 
 
 // middlewares for server
