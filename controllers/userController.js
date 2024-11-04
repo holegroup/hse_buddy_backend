@@ -43,8 +43,8 @@ async function login(req, res){
 
 async function createUser(req, res) {
 
+    const { name, email, password, role } = req.body;
     try {
-        const { name, email, password, role } = req.body;
         // checking for if user exsists or not
         let user = await User.findOne({ email: email });
         if (user) {
@@ -71,7 +71,7 @@ async function createUser(req, res) {
         });
     }
     catch (e) {
-        res.status(500).json({
+        return res.status(500).json({
             message: e.message,
         })
     }
