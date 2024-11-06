@@ -2,7 +2,7 @@ const inspectionForm = require("../models/inspectionform.model");
 
 async function createInspectionForm(req, res){ 
     try{ 
-        const { equip_name_look, date_manufacture, part_num, serial_num, maintenance_freq, equip_desc, picture } = req.query; 
+        const { equip_name_look, date_manufacture, part_num, serial_num, maintenance_freq, equip_desc, picture } = req.body; 
 
         const newInspection = new inspectionForm({ 
             equip_name_look,
