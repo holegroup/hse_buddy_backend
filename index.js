@@ -4,6 +4,7 @@ const app = express();
 const connectDB = require("./config/db");
 
 const userRoutes = require("./routes/userRoutes"); 
+const inspectionFormRoutes = require("./routes/inspectionFormRoutes"); 
 
 // cors
 const cors = require("cors"); 
@@ -24,6 +25,9 @@ connectDB();
 // defining the routes
 // user routes
 app.use("/api/users", userRoutes); 
+
+// inspection form routes
+app.use("/api/forms", inspectionFormRoutes); 
 
 app.get("/testing", (req, res)=> { 
     res.send("<h1>Hello Subhankar</h1>"); 

@@ -39,4 +39,4 @@ const inspectionFormSchema = mongoose.Schema({
     timestamps: true
 }); 
 
-model.exports = mongoose.model("Inspection",inspectionFormSchema ); 
+module.exports = mongoose.model("Inspection",inspectionFormSchema ); 
