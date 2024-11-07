@@ -1,8 +1,50 @@
 const InspectionForm = require("../models/inspectionform.model"); 
+require("dotenv").config(); 
+const cloudinary = require("cloudinary").v2; 
+
+
+cloudinary.config({ 
+    cloud_name: process.env.CLOUD_NAME, 
+    api_key: process.env.CLOUDINARY_API_KEY, 
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+
+
 
 async function createInspectionForm(req, res){ 
     try{ 
-        const { equip_name_look, date_manufacture, part_num, serial_num, maintenance_freq, equip_desc, picture } = req.body; 
+        const { equip_name_look, date_manufacture, part_num, serial_num, maintenance_freq, equip_desc} = req.body; 
+        const pictureUrls = [];
+
+        const samePartNumber = await InspectionForm.findOne({part_num}); 
+        if(samePartNumber) { 
+            return res.status(400).json({message: "Form with a same partnumber has already been created"});  
+        }
+
+        const sameSerialNumber = await InspectionForm.findOne({serial_num}); 
+        if(sameSerialNumber) { 
+            return res.status(400).json({message: "Form with a same serialnumber has already been created"});  
+        }
+
+        // console.log(req.files); 
+        
+        for(const file of req.files){ 
+            const result = await new Promise((resolve, reject) => {
+                
+                console.log(file)
+                cloudinary.uploader.upload_stream(
+                    {folder: "inspections"}, 
+                    (error, result) => { 
+                        if(error) reject(error); 
+                        else resolve(result); 
+                        console.log(result)
+                    },
+                ).end(file.buffer); 
+            }); 
+
+            pictureUrls.push(result.secure_url); 
+        }
 
         const newInspection = new InspectionForm({ 
             equip_name_look,
@@ -11,7 +53,7 @@ async function createInspectionForm(req, res){
             serial_num,
             maintenance_freq,
             equip_desc,
-            picture
+            picture: pictureUrls
         }); 
 
         const saveInspection = await newInspection.save(); 

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const inspectionFormSchema = mongoose.Schema({ 
     equip_name_look: { 
-        name: {type: String, required: true}, 
+        name: {type: String,}, 
         sub_items: [
             {
                 name: {type: String}, 
@@ -32,7 +32,7 @@ const inspectionFormSchema = mongoose.Schema({
         required: true
     },
     picture: {
-        type: String, // URL of the picture uploaded to Cloudinary
+        type: [String], // URL of the picture uploaded to Cloudinary
         required: true
     }
 }, {
