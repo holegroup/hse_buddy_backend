@@ -12,20 +12,18 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    part_num: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    serial_num: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    sub_items: { 
-        type: [String], 
-        default: []
-    }
+    items:[ 
+        { 
+            serial_number: {type: String}, 
+            name: {type: String}, 
+            parts: [ 
+                { 
+                    part_name: {type: String}, 
+                    part_number: {type: String}
+                }
+            ]
+        }
+    ]
 });
 
 module.exports = mongoose.model("Product", productSchema);

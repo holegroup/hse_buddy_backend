@@ -11,14 +11,14 @@ async function login(req, res){
 
         // if not user then return
         if(!user) { 
-            return res.status(404).json({message: "User not found"}); 
+            return res.status(401).json({message: "Unauthorized"}); 
         }
 
         // validating the password
         const isMatch = await bcrypt.compare(password, user.password); 
         if(!isMatch){ 
             return res.status(401).json({ 
-                message: "Invalid Credentials"
+                message: "Incorrect Password"
             }); 
         }
 

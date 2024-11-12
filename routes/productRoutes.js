@@ -3,7 +3,7 @@ const path = require("path");
 const express = require("express"); 
 const os = require("os"); 
 router = express.Router(); 
-const {saveFile} = require("../controllers/productController"); 
+const {saveFile, addItems, fetchAllProducts} = require("../controllers/productController"); 
 
 
 const storage = multer.diskStorage({ 
@@ -18,6 +18,8 @@ const storage = multer.diskStorage({
 const upload = multer({storage: storage});
 
 router.post("/save-file",upload.single('csvFile'), saveFile); 
+router.post("/add-items", addItems); 
+router.get("/fetch-all-items", fetchAllProducts); 
 
 
 module.exports = router; 

@@ -16,12 +16,8 @@ async function saveFile(req, res) {
             for (let row of result) {
                 const newProduct = new Product({
                     equip_name: row.equip_name,
-                    description: row.description,
+                    description: row.description,   
                     actual_equip_id: row.actual_equip_id,
-                    part_num: row.part_num,
-                    serial_num: row.serial_num,
-                    sub_items: row.sub_items? row.sub_items.split(",").map((item) => item.trim()):[]
-
                 }); 
 
                 try{    
@@ -41,5 +37,44 @@ async function saveFile(req, res) {
       
 }
 
-module.exports = { saveFile }
+
+
+async function addItems (req, res){ 
+    const {productId, items} = req.body; 
+
+    try{ 
+        const product = await Product.findById(productId); 
+        if(!product){ 
+            return res.status(404).json({message: "Product Not Found"}); 
+        }
+
+        product.items = items; 
+
+        await product.save(); 
+
+        return res.status(200).json({message: "Items Saved Successfully", data: product})
+    }catch(e){ 
+        return res.status(500).json({message: e.message}); 
+    }
+}
+
+async function fetchAllProducts(__, res){ 
+    try{ 
+        const result = await Product.find(); 
+        if(!result){ 
+            return res.status(404).json({message: "No Products Found"}); 
+        }
+
+        return res.status(200).json({message: "Saved Items", data: result}); 
+
+    }catch(e){ 
+        return res.status(500).json({message: e.message}); 
+    }
+}
+
+
+
+
+
+module.exports = { saveFile, addItems, fetchAllProducts }
 
