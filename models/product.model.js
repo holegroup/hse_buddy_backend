@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema({
     equip_name: {
-        type: String, // Corrected to lowercase 'type'
+        type: String,
         required: true,
     },
     description: {
