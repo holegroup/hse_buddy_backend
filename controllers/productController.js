@@ -78,14 +78,74 @@ async function searchProducts(req, res){
     try{ 
         const {query} = req.query; 
 
-        // const result = await Product.find({ 
-        //     "items.parts.part_name": new RegExp(query, 'i') // will be case insensitive
+    
 
-        // }, { 
-        //     "equip_name": 1, 
-        //     "items.serial_number": 1, 
-        //     "items.parts.part_name": 1 // will include all matching parts 
-        // }); 
+        // const result = await Product.aggregate([
+        //     { 
+        //         $match: {
+        //             $or: [
+        //                 { "items.parts.part_name": new RegExp(query, 'i') },
+        //                 { "items.serial_number": new RegExp(query, 'i') },
+        //                 { "items.parts.part_number": new RegExp(query, 'i') }
+        //             ]
+        //         }
+        //     },
+        //     {
+        //         $project: {
+        //             equip_name: 1,
+        //             // "items.serial_number": 1,
+        //             // "items.name": 1,
+        //             searchItems: {
+        //                 $map: {
+        //                     input: "$items",
+        //                     as: "item",
+        //                     in: {
+        //                         serial_number: "$$item.serial_number",
+        //                         name: "$$item.name", 
+        //                         parts: {
+        //                             $filter: {
+        //                                 input: "$$item.parts",
+        //                                 as: "part",
+        //                                 cond: { 
+        //                                     $or:[
+        //                                         {
+        //                                             $regexMatch: { input: "$$part.part_name", regex: query, options: 'i' }
+        //                                         }, 
+        //                                         { 
+        //                                             $regexMatch: { input: "$$part.part_number", regex: query, options: 'i' }
+        //                                         }, 
+        //                                         { 
+        //                                             $regexMatch: { input: "$$item.serial_number", regex: query, options: 'i' }
+        //                                         }
+        //                                     ]
+        //                                  }
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }, 
+        //     {
+        //         $project: {
+        //             searchItems: {
+        //                 $filter: {
+        //                     input: "$searchItems",
+        //                     as: "searchItem",
+        //                     cond: { 
+        //                         $or: [ 
+        //                             { $gt: [{ $size: "$$searchItem.parts" }, 0] },  //matching the name of the part
+        //                             { $eq: ["$$searchItem.serial_number", query] }, // or matching the serial number of the product
+        //                             { $eq: ["$$searchItem.parts.part_number", query] } // or matching the partnumber of the part
+        //                         ]
+
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // ]);
+
 
 
         const result = await Product.aggregate([
@@ -93,63 +153,45 @@ async function searchProducts(req, res){
                 $match: {
                     $or: [
                         { "items.parts.part_name": new RegExp(query, 'i') },
-                        { "items.serial_number": new RegExp(query, 'i') },
                         { "items.parts.part_number": new RegExp(query, 'i') }
                     ]
                 }
             },
             {
                 $project: {
-                    equip_name: 1,
-                    // "items.serial_number": 1,
-                    // "items.name": 1,
-                    searchItems: {
-                        $map: {
-                            input: "$items",
-                            as: "item",
-                            in: {
-                                serial_number: "$$item.serial_number",
-                                name: "$$item.name", 
-                                parts: {
-                                    $filter: {
-                                        input: "$$item.parts",
-                                        as: "part",
-                                        cond: { 
-                                            $or:[
-                                                {
-                                                    $regexMatch: { input: "$$part.part_name", regex: query, options: 'i' }
-                                                }, 
-                                                { 
-                                                    $regexMatch: { input: "$$part.part_number", regex: query, options: 'i' }
-                                                }, 
-                                                { 
-                                                    $regexMatch: { input: "$$item.serial_number", regex: query, options: 'i' }
-                                                }
-                                            ]
-                                         }
+                    parts: {
+                        $reduce: {
+                            input: "$items.parts",
+                            initialValue: [],
+                            in: { 
+                                $concatArrays: [
+                                    "$$value",
+                                    {
+                                        $filter: {
+                                            input: "$$this",
+                                            as: "part",
+                                            cond: { 
+                                                $or: [
+                                                    { $regexMatch: { input: "$$part.part_name", regex: query, options: 'i' } },
+                                                    { $regexMatch: { input: "$$part.part_number", regex: query, options: 'i' } }
+                                                ]
+                                            }
+                                        }
                                     }
-                                }
+                                ]
                             }
                         }
                     }
                 }
-            }, 
+            },
+            {
+                $unwind: "$parts"
+            },
             {
                 $project: {
-                    searchItems: {
-                        $filter: {
-                            input: "$searchItems",
-                            as: "searchItem",
-                            cond: { 
-                                $or: [ 
-                                    { $gt: [{ $size: "$$searchItem.parts" }, 0] },  //matching the name of the part
-                                    { $eq: ["$$searchItem.serial_number", query] }, // or matching the serial number of the product
-                                    { $eq: ["$$searchItem.parts.part_number", query] } // or matching the partnumber of the part
-                                ]
-
-                            }
-                        }
-                    }
+                    part_name: "$parts.part_name",
+                    part_number: "$parts.part_number",
+                    _id: "$parts._id"
                 }
             }
         ]);
