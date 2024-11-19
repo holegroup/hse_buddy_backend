@@ -1,14 +1,14 @@
-const mongoose = require("mongoose"); 
+const mongoose = require("mongoose");
 
-const inspectionFormSchema = mongoose.Schema({ 
-    equip_name_look: { 
-        name: {type: String,}, 
-        sub_items: [
-            {
-                name: {type: String}, 
-            }
-        ]
+const inspectionFormSchema = mongoose.Schema({
+    equip_name_look: {
+        type: String
     },
+    sub_items: [
+        {
+            name: { type: String },
+        }
+    ],
     date_manufacture: {
         type: Date,
         required: true
@@ -37,6 +37,6 @@ const inspectionFormSchema = mongoose.Schema({
     }
 }, {
     timestamps: true
-}); 
+});
 
-module.exports = mongoose.model("Inspection",inspectionFormSchema ); 
+module.exports = mongoose.model("Inspection", inspectionFormSchema); 
