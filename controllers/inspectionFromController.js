@@ -14,7 +14,7 @@ cloudinary.config({
 
 async function createInspectionForm(req, res){ 
     try{ 
-        const { equip_name_look, date_manufacture, part_num, serial_num, maintenance_freq, equip_desc} = req.body; 
+        const { equip_name_look, date_manufacture, part_num, serial_num, maintenance_freq, equip_desc, location, lat, long} = req.body; 
         const pictureUrls = [];
 
         const samePartNumber = await InspectionForm.findOne({part_num}); 
@@ -53,7 +53,10 @@ async function createInspectionForm(req, res){
             serial_num,
             maintenance_freq,
             equip_desc,
-            picture: pictureUrls
+            picture: pictureUrls, 
+            location, 
+            lat, 
+            long
         }); 
 
         const saveInspection = await newInspection.save(); 

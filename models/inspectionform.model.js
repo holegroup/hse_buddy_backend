@@ -16,12 +16,10 @@ const inspectionFormSchema = mongoose.Schema({
     part_num: {
         type: String,
         required: true,
-        unique: true
     },
     serial_num: {
         type: String,
         required: true,
-        unique: true
     },
     maintenance_freq: {
         type: Number, // in days
@@ -33,6 +31,18 @@ const inspectionFormSchema = mongoose.Schema({
     },
     picture: {
         type: [String], // URL of the picture uploaded to Cloudinary
+        required: true
+    }, 
+    location: { 
+        type: String, 
+        required: true
+    }, 
+    lat: {
+        type: String, 
+        required: true
+    }, 
+    long: { 
+        type: String, 
         required: true
     }
 }, {
