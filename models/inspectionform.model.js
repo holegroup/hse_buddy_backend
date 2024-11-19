@@ -31,7 +31,7 @@ const inspectionFormSchema = mongoose.Schema({
     },
     picture: {
         type: [String], // URL of the picture uploaded to Cloudinary
-        required: true
+        
     }, 
     location: { 
         type: String, 
