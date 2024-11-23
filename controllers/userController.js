@@ -2,6 +2,15 @@ const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 require("dotenv").config(); 
+const cloudinary = require("cloudinary").v2; 
+
+
+cloudinary.config({ 
+    cloud_name: process.env.CLOUD_NAME, 
+    api_key: process.env.CLOUDINARY_API_KEY, 
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 
 
 async function login(req, res){ 
@@ -77,6 +86,116 @@ async function createUser(req, res) {
     }
 }
 
+async function searchUser(req, res){ 
+    try{ 
+        const {query} = req.query;
+         
+        const users = await User.find({ 
+            $or:[
+                { 
+                    name: {$regex: new RegExp(query, "i")}
+                }, 
+                { 
+                    email: {$regex: new RegExp(query, "i")}
+                }, 
+                // { name: { $regex: `^${query}`, $options: "i" } },
+                // { email: { $regex: `^${query}`, $options: "i" } }
+
+            ], 
+            role: "inspector", 
+        }).select("-password"); 
+
+
+
+        if(users.length === 0){ 
+            return res.status(404).json({message: "No Users Found"});
+        }
+
+        return res.status(200).json({message: "Success", data: users}); 
+
+    }
+    catch(e){ 
+        return res.status(500).json({message: e.message}); 
+    }
+}
+
+async function editProfile(req, res){ 
+    try{ 
+  
+        const {userId, name, newPassword, currentPassword} = req.body
+        const file = req.file // for image file
+
+        // console.log(file); 
+        // if user exists 
+        const user = await User.findById(userId); 
+        if(!user){ 
+            return res.status(404).json({message: "User Not Found"}); 
+        }
+
+        const updates = {}; 
+
+        // name
+        if(name) { 
+            updates.name = name;
+        }
+
+        // password
+        if(newPassword){ 
+            if(!currentPassword){ 
+                return res.status(400).json({message: "Current Password Is Required For Changing The Password"}); 
+            }
+
+            // validating the current passowrd 
+            const isMatch = await bcrypt.compare(currentPassword, user.password); 
+            if(!isMatch){ 
+                return res.status(401).json({message: "Incorrect Password"}); 
+            }
+
+            const salt = await bcrypt.genSalt(10); 
+            updates.password = await bcrypt.hash(newPassword, salt); 
+        }
+
+
+        // image
+        if(file){ 
+          
+            const result = await new Promise((resolve, reject) => { 
+                // console.log(file, "this is file"); 
+
+                cloudinary.uploader.upload_stream( 
+                    {folder: "User_profile_images"}, 
+                    (error, result) => { 
+                        if(error) reject(error); 
+                        else resolve(result); 
+                    }
+                ).end(file.buffer); 
+            }); 
+
+            updates.profile_img = result.secure_url; 
+        }
+
+        // saving the updates
+        if(Object.keys(updates).length === 0){ 
+            return res.status(400).json({ message: "No Fields Are Provided To Update"}); 
+        }
+        
+        // console.log(updates, "This is Updates"); 
+        const updatedUser = await User.findByIdAndUpdate(
+            userId, 
+            {$set: updates}, 
+            {new: true}
+        )
+        return res.status(200).json({ 
+            message: "Success", 
+            data: updatedUser,
+        }); 
+
+
+    }catch(e){ 
+        return res.status(500).json({message: e.message}); 
+    }
+}
+
 // async function createUser(req, res){ 
 //     try{
 //         const {name, email, password, role} = req.body; 
@@ -92,7 +211,7 @@ async function createUser(req, res) {
 
 
 
-module.exports = {login, createUser}; 
+module.exports = {login, createUser, searchUser, editProfile}; 
 
 
 
