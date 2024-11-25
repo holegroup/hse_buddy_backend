@@ -40,25 +40,24 @@ async function createTask(req, res) {
 
 async function getTasks(req, res) {
     try {
-        // Extract token from headers
+
         const token = req.headers.authorization?.split(" ")[1];
         // console.log(token)
         if (!token) {
             return res.status(401).json({ message: "No token provided" });
         }
 
-        // Verify and decode the token
+     
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         // console.log(decoded.user.id)
-        const userId = decoded.user.id; // Assuming 'id' is stored in the token payload
+        const userId = decoded.user.id; 
 
         if (!userId) {
             return res.status(401).json({ message: "Invalid token" });
         }
 
-        // Find tasks assigned to this user
-        const tasks = await Task.find({ userId: userId }); // Adjust query field if necessary
+        const tasks = await Task.find({ userId: userId });
 
         // Return tasks
         res.status(200).json({
@@ -74,4 +73,35 @@ async function getTasks(req, res) {
 }
 
 
-module.exports = { createTask, getTasks }; 
+async function changeStatus(req, res){ 
+    try{ 
+        const {taskId, status} = req.body; 
+        if(!taskId || !status) { 
+           return res.status(400).json({message: "TaskID and Status are required"}); 
+        }; 
+        const validateStatuses = ["Pending", "Due", "Overdue", "Completed"]; 
+        if(!validateStatuses.includes(status)){ 
+            return res.status(400).json({message: "Invalid Status"}); 
+        }
+
+        const updatedTask = await Task.findByIdAndUpdate(
+            taskId, 
+            { status }, 
+            {new: true}, 
+        )
+
+        if(!updatedTask){ 
+            return res.status(404).json({message: "Task Not Found"}); 
+        }
+
+        return res.status(200).json({ 
+            message: "Task Updated Successfully", 
+            data: updatedTask
+        })
+    }catch(e){ 
+        return res.status(500).json({message: e.message}); 
+    }
+}
+
+
+module.exports = { createTask, getTasks, changeStatus }; 
