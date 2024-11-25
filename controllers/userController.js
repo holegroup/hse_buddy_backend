@@ -119,13 +119,13 @@ async function searchUser(req, res){
     }
 }
 
+// area of improvement when user changes his / hers dp then the previous image should get deleted from the cloudinary as well...
 async function editProfile(req, res){ 
     try{ 
   
         const {userId, name, newPassword, currentPassword} = req.body
         const file = req.file // for image file
 
-        // console.log(file); 
         // if user exists 
         const user = await User.findById(userId); 
         if(!user){ 

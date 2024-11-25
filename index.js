@@ -7,6 +7,7 @@ const userRoutes = require("./routes/userRoutes");
 const inspectionFormRoutes = require("./routes/inspectionFormRoutes"); 
 const productRoutes = require("./routes/productRoutes"); 
 const siteRoutes = require("./routes/siteRoute"); 
+const taskRoutes = require("./routes/taskRoutes"); 
 
 // cors
 const cors = require("cors"); 
@@ -36,6 +37,9 @@ app.use("/api/products", productRoutes);
 
 // site routes
 app.use("/api/sites", siteRoutes); 
+
+// task routes
+app.use("/api/tasks", taskRoutes); 
 
 app.get("/testing", (req, res)=> { 
     res.send("<h1>Hello Subhankar</h1>"); 
