@@ -5,10 +5,22 @@ require("dotenv").config();
 
 async function createTask(req, res) {
     try {
-        const { inspector_name, email, product, due_date, note } = req.body;
+        const { inspector_name, email, product,part_number, due_date, note } = req.body;
+        const token = req.headers.authorization?.split(" ")[1];
+        // console.log(token, "this is token"); 
+        if (!token) {
+            return res.status(401).json({ message: "No token provided" });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        const supervisorId = decoded.user.id;
+        if(!supervisorId){ 
+            return res.status(400).json({message: "Invalid Token"}); 
+        }
 
 
-        if (!inspector_name || !email || !product || !due_date) {
+        if (!inspector_name || !email || !product || !due_date || !part_number) {
             return res.status(400).json({ message: "All required fields must be filled." });
         }
 
@@ -23,9 +35,11 @@ async function createTask(req, res) {
             inspector_name,
             email,
             product,
+            part_number,
             due_date,
             note, 
-            userId
+            userId,
+            supervisorId, 
         })
 
         const savedTask = await newTask.save();
@@ -42,7 +56,7 @@ async function getTasks(req, res) {
     try {
 
         const token = req.headers.authorization?.split(" ")[1];
-        // console.log(token)
+        // console.log(token, "this is token"); 
         if (!token) {
             return res.status(401).json({ message: "No token provided" });
         }
@@ -72,6 +86,36 @@ async function getTasks(req, res) {
     }
 }
 
+
+async function assignedTask(req, res){ 
+    try{ 
+        const token = req.headers.authorization?.split(" ")[1];
+        // console.log(token, "this is token"); 
+        if (!token) {
+            return res.status(401).json({ message: "No token provided" });
+        }
+
+     
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // console.log(decoded.user.id)
+        const supervisorId = decoded.user.id; 
+
+        if (!supervisorId) {
+            return res.status(401).json({ message: "Invalid token" });
+        }
+
+        const tasks = await Task.find({ supervisorId: supervisorId });
+
+        // Return tasks
+        res.status(200).json({
+            message: "Tasks",
+            data: tasks,
+        });
+    }catch(e){ 
+        return res.status(500).json({message: e.message}); 
+    }
+}
 
 async function changeStatus(req, res){ 
     try{ 
@@ -104,4 +148,4 @@ async function changeStatus(req, res){
 }
 
 
-module.exports = { createTask, getTasks, changeStatus }; 
+module.exports = { createTask, getTasks, changeStatus, assignedTask }; 

@@ -19,6 +19,7 @@ app.get("/", (req, res) => {
 }); 
 
 // middlewares for server
+console.log("Here")
 app.use(bodyParser.json()); 
 app.use(cors()); 
 

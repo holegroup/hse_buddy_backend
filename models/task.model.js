@@ -14,6 +14,10 @@ const taskSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    part_number: { 
+      type: String, 
+      required: true,
+    },
     due_date: {
       type: Date,
       required: true,
@@ -32,6 +36,11 @@ const taskSchema = mongoose.Schema(
       required: true,
       ref: "User",
     },
+    supervisorId: {
+      type: mongoose.Schema.Types.ObjectId, 
+      required: true,
+      ref: "User",
+    }
   },
   {
     timestamps: true,
