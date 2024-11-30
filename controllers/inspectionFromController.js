@@ -1,4 +1,5 @@
 const InspectionForm = require("../models/inspectionform.model"); 
+const Task = require("../models/task.model"); 
 require("dotenv").config(); 
 const cloudinary = require("cloudinary").v2; 
 
@@ -14,18 +15,18 @@ cloudinary.config({
 
 async function createInspectionForm(req, res){ 
     try{ 
-        const { equip_name_look, date_manufacture, part_num, serial_num, maintenance_freq, equip_desc, location, lat, long} = req.body; 
+        const { equip_name_look, date_manufacture, part_num, serial_num, maintenance_freq, equip_desc, location, lat, long, taskId} = req.body;  
         const pictureUrls = [];
 
-        const samePartNumber = await InspectionForm.findOne({part_num}); 
-        if(samePartNumber) { 
-            return res.status(400).json({message: "Form with a same partnumber has already been created"});  
-        }
+        // const samePartNumber = await InspectionForm.findOne({part_num}); 
+        // if(samePartNumber) { 
+        //     return res.status(400).json({message: "Form with a same partnumber has already been created"});  
+        // }
 
-        const sameSerialNumber = await InspectionForm.findOne({serial_num}); 
-        if(sameSerialNumber) { 
-            return res.status(400).json({message: "Form with a same serialnumber has already been created"});  
-        }
+        // const sameSerialNumber = await InspectionForm.findOne({serial_num}); 
+        // if(sameSerialNumber) { 
+        //     return res.status(400).json({message: "Form with a same serialnumber has already been created"});  
+        // }
 
         // console.log(req.files); 
         
@@ -56,11 +57,21 @@ async function createInspectionForm(req, res){
             picture: pictureUrls, 
             location, 
             lat, 
-            long
+            long,
+            taskId
         }); 
+
+      
 
         const saveInspection = await newInspection.save(); 
 
+        // console.log(saveInspection, "This is inpsection form "); 
+        if(taskId){ 
+            const task = await Task.findById(taskId);  
+            task.inspectionForms.push(saveInspection._id);
+            task.status = "Completed" ; 
+            await task.save(); 
+        }
         return res.status(200).json({ 
             message: "Inspection Form Created Successfully", 
             data: saveInspection, 

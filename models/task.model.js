@@ -40,7 +40,11 @@ const taskSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId, 
       required: true,
       ref: "User",
-    }
+    }, 
+    inspectionForms: [
+      {type: mongoose.Schema.Types.ObjectId,  ref: "Inspection"}, 
+     
+    ] , 
   },
   {
     timestamps: true,

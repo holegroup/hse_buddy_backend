@@ -44,6 +44,10 @@ const inspectionFormSchema = mongoose.Schema({
     long: { 
         type: String, 
         required: true
+    }, 
+    taskId: { 
+        type: String, 
+        default: null
     }
 }, {
     timestamps: true
