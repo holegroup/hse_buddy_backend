@@ -99,6 +99,32 @@ async function getAllInspectionForms(req, res) {
     }
 }
 
+async function getInspectionFormByTaskId(req, res){ 
+    try { 
+        const {taskId} = req.query; 
+        console.log(taskId)
+        if(!taskId) { 
+            return res.status(400).json({message: "Task Id is Required"}); 
+        }
+
+        const task = await Task.findById(taskId).populate('inspectionForms'); 
+        if(!task){ 
+            return res.status(404).json({message: "Task Not Found"}); 
+        }
+
+        if (!task.inspectionForms || task.inspectionForms.length === 0) {
+            return res.status(404).json({ message: 'No inspection forms found for this task' });
+        }
+
+        return res.status(200).json({
+            message: 'Inspection forms retrieved successfully',
+            data: task.inspectionForms,
+        });
+    }catch(e){ 
+        res.status(500).json({ message:e.message });
+    }
+}
+
 
 // // Get a single inspection form by part number
 // exports.getInspectionFormByPartNum = async (req, res) => {
@@ -169,4 +195,4 @@ async function getAllInspectionForms(req, res) {
 
 
 
-module.exports = {createInspectionForm, getAllInspectionForms}; 
+module.exports = {createInspectionForm, getAllInspectionForms, getInspectionFormByTaskId}; 
