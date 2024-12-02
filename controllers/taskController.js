@@ -147,5 +147,22 @@ async function changeStatus(req, res){
     }
 }
 
+async function deleteById(req, res) { 
+    try{ 
+        const {taskId} = req.query; 
+        const deletedTask = await Task.findByIdAndDelete(taskId); 
+        if(!deletedTask){ 
+            return res.status(404).json({message: "Task not found"}); 
+        }
 
-module.exports = { createTask, getTasks, changeStatus, assignedTask }; 
+        return res.status(200).json({ 
+            message: "Task Deleted Successfully", 
+            data:  deletedTask,
+        }); 
+    }catch(e){ 
+        return res.status(500).json({message: e.message}); 
+    }
+}
+
+
+module.exports = { createTask, getTasks, changeStatus, assignedTask, deleteById }; 

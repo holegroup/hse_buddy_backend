@@ -102,7 +102,7 @@ async function getAllInspectionForms(req, res) {
 async function getInspectionFormByTaskId(req, res){ 
     try { 
         const {taskId} = req.query; 
-        console.log(taskId)
+  
         if(!taskId) { 
             return res.status(400).json({message: "Task Id is Required"}); 
         }
