@@ -71,12 +71,25 @@ async function getTasks(req, res) {
             return res.status(401).json({ message: "Invalid token" });
         }
 
-        // const tasks = await Task.find({ userId: userId });
-        const tasks = await Task.find({ userId: userId }).sort({ dueDate: 1 })
 
+        const pages = parseInt(req.query.pages) || 1; 
+        const limit = 5; 
+        const skip = (pages - 1) * limit; 
+
+
+        // const tasks = await Task.find({ userId: userId });
+        const tasks = await Task.find({ userId: userId }).skip(skip).limit(limit).sort({ due_date: 1 });
+
+
+        const totalTasks = await Task.countDocuments({userId: userId}); 
         // Return tasks
         res.status(200).json({
             message: "Assigned Tasks",
+            pagination: { 
+                currentPage: pages, 
+                totalPages: Math.ceil(totalTasks / limit), 
+                totalTasks: totalTasks
+            },
             data: tasks,
         });
     } catch (error) {
@@ -106,12 +119,27 @@ async function assignedTask(req, res){
             return res.status(401).json({ message: "Invalid token" });
         }
 
-        const tasks = await Task.find({ supervisorId: supervisorId }).sort({ dueDate: 1 });
+        const pages = parseInt(req.query.pages) || 1; 
+        const limit = 5; 
+        const skip = (pages - 1) * limit; 
+
+        
+
+
+        const tasks = await Task.find({ supervisorId: supervisorId }).skip(skip).limit(limit).sort({ due_date: 1 });
+
+        const totalTasks = await Task.countDocuments({supervisorId: supervisorId}); 
 
         // Return tasks
         res.status(200).json({
             message: "Tasks",
+            pagination: { 
+                currentPage: pages, 
+                totalPages: Math.ceil(totalTasks / limit), 
+                totalTasks: totalTasks
+            },
             data: tasks,
+           
         });
     }catch(e){ 
         return res.status(500).json({message: e.message}); 
