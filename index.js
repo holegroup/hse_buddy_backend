@@ -2,7 +2,12 @@ require("dotenv").config();
 const express = require("express"); 
 const app = express(); 
 const connectDB = require("./config/db");
+const schedule = require("node-schedule"); 
 
+// utils
+const {updateTaskStatus} = require("./utils/taskAutoUpdater");  
+
+// routes
 const userRoutes = require("./routes/userRoutes"); 
 const inspectionFormRoutes = require("./routes/inspectionFormRoutes"); 
 const productRoutes = require("./routes/productRoutes"); 
@@ -41,6 +46,13 @@ app.use("/api/sites", siteRoutes);
 
 // task routes
 app.use("/api/tasks", taskRoutes); 
+
+
+// job scheduling (update task status)
+schedule.scheduleJob("43 11 * * *", async () => { 
+    await updateTaskStatus(); 
+}); 
+
 
 app.get("/testing", (req, res)=> { 
     res.send("<h1>Hello Subhankar</h1>"); 

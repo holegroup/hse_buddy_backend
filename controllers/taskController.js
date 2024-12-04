@@ -123,7 +123,7 @@ async function changeStatus(req, res){
         if(!taskId || !status) { 
            return res.status(400).json({message: "TaskID and Status are required"}); 
         }; 
-        const validateStatuses = ["Pending", "Due", "Overdue", "Completed"]; 
+        const validateStatuses = ["Pending", "Due Soon", "Overdue", "Completed"]; 
         if(!validateStatuses.includes(status)){ 
             return res.status(400).json({message: "Invalid Status"}); 
         }
