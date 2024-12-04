@@ -49,7 +49,7 @@ app.use("/api/tasks", taskRoutes);
 
 
 // job scheduling (update task status)
-schedule.scheduleJob("0 0 * * *", async () => { 
+schedule.scheduleJob("55 11 * * *", async () => { 
     await updateTaskStatus(); 
 }); 
 
