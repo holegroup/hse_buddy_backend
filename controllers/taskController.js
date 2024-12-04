@@ -71,7 +71,8 @@ async function getTasks(req, res) {
             return res.status(401).json({ message: "Invalid token" });
         }
 
-        const tasks = await Task.find({ userId: userId });
+        // const tasks = await Task.find({ userId: userId });
+        const tasks = await Task.find({ userId: userId }).sort({ dueDate: 1 })
 
         // Return tasks
         res.status(200).json({
@@ -105,7 +106,7 @@ async function assignedTask(req, res){
             return res.status(401).json({ message: "Invalid token" });
         }
 
-        const tasks = await Task.find({ supervisorId: supervisorId });
+        const tasks = await Task.find({ supervisorId: supervisorId }).sort({ dueDate: 1 });
 
         // Return tasks
         res.status(200).json({
