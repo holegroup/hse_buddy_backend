@@ -1,11 +1,11 @@
 const Task = require("../models/task.model");
-const User = require("../models/user.model"); 
+const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 async function createTask(req, res) {
     try {
-        const { inspector_name, email, product,part_number, due_date, note } = req.body;
+        const { inspector_name, email, product, part_number, due_date, note } = req.body;
         const token = req.headers.authorization?.split(" ")[1];
         // console.log(token, "this is token"); 
         if (!token) {
@@ -15,8 +15,8 @@ async function createTask(req, res) {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         const supervisorId = decoded.user.id;
-        if(!supervisorId){ 
-            return res.status(400).json({message: "Invalid Token"}); 
+        if (!supervisorId) {
+            return res.status(400).json({ message: "Invalid Token" });
         }
 
 
@@ -37,9 +37,9 @@ async function createTask(req, res) {
             product,
             part_number,
             due_date,
-            note, 
+            note,
             userId,
-            supervisorId, 
+            supervisorId,
         })
 
         const savedTask = await newTask.save();
@@ -61,33 +61,33 @@ async function getTasks(req, res) {
             return res.status(401).json({ message: "No token provided" });
         }
 
-     
+
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         // console.log(decoded.user.id)
-        const userId = decoded.user.id; 
+        const userId = decoded.user.id;
 
         if (!userId) {
             return res.status(401).json({ message: "Invalid token" });
         }
 
 
-        const pages = parseInt(req.query.pages) || 1; 
-        const limit = 5; 
-        const skip = (pages - 1) * limit; 
+        const pages = parseInt(req.query.pages) || 1;
+        const limit = 5;
+        const skip = (pages - 1) * limit;
 
 
         // const tasks = await Task.find({ userId: userId });
         const tasks = await Task.find({ userId: userId }).skip(skip).limit(limit).sort({ due_date: 1 });
 
 
-        const totalTasks = await Task.countDocuments({userId: userId}); 
+        const totalTasks = await Task.countDocuments({ userId: userId });
         // Return tasks
         res.status(200).json({
             message: "Assigned Tasks",
-            pagination: { 
-                currentPage: pages, 
-                totalPages: Math.ceil(totalTasks / limit), 
+            pagination: {
+                currentPage: pages,
+                totalPages: Math.ceil(totalTasks / limit),
                 totalTasks: totalTasks
             },
             data: tasks,
@@ -95,103 +95,181 @@ async function getTasks(req, res) {
     } catch (error) {
         console.error("Error fetching tasks:", error.message);
         res.status(500).json({
-            message: e.message, 
+            message: e.message,
         });
     }
 }
 
 
-async function assignedTask(req, res){ 
-    try{ 
+async function assignedTask(req, res) {
+    try {
         const token = req.headers.authorization?.split(" ")[1];
         // console.log(token, "this is token"); 
         if (!token) {
             return res.status(401).json({ message: "No token provided" });
         }
 
-     
+
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         // console.log(decoded.user.id)
-        const supervisorId = decoded.user.id; 
+        const supervisorId = decoded.user.id;
 
         if (!supervisorId) {
             return res.status(401).json({ message: "Invalid token" });
         }
 
-        const pages = parseInt(req.query.pages) || 1; 
-        const limit = 5; 
-        const skip = (pages - 1) * limit; 
+        const pages = parseInt(req.query.pages) || 1;
+        const limit = 5;
+        const skip = (pages - 1) * limit;
 
-        
+
 
 
         const tasks = await Task.find({ supervisorId: supervisorId }).skip(skip).limit(limit).sort({ due_date: 1 });
 
-        const totalTasks = await Task.countDocuments({supervisorId: supervisorId}); 
+        const totalTasks = await Task.countDocuments({ supervisorId: supervisorId });
 
         // Return tasks
         res.status(200).json({
             message: "Tasks",
-            pagination: { 
-                currentPage: pages, 
-                totalPages: Math.ceil(totalTasks / limit), 
+            pagination: {
+                currentPage: pages,
+                totalPages: Math.ceil(totalTasks / limit),
                 totalTasks: totalTasks
             },
             data: tasks,
-           
+
         });
-    }catch(e){ 
-        return res.status(500).json({message: e.message}); 
+    } catch (e) {
+        return res.status(500).json({ message: e.message });
     }
 }
 
-async function changeStatus(req, res){ 
-    try{ 
-        const {taskId, status} = req.body; 
-        if(!taskId || !status) { 
-           return res.status(400).json({message: "TaskID and Status are required"}); 
-        }; 
-        const validateStatuses = ["Pending", "Due Soon", "Overdue", "Completed"]; 
-        if(!validateStatuses.includes(status)){ 
-            return res.status(400).json({message: "Invalid Status"}); 
+async function changeStatus(req, res) {
+    try {
+        const { taskId, status } = req.body;
+        if (!taskId || !status) {
+            return res.status(400).json({ message: "TaskID and Status are required" });
+        };
+        const validateStatuses = ["Pending", "Due Soon", "Overdue", "Completed"];
+        if (!validateStatuses.includes(status)) {
+            return res.status(400).json({ message: "Invalid Status" });
         }
 
         const updatedTask = await Task.findByIdAndUpdate(
-            taskId, 
-            { status }, 
-            {new: true}, 
+            taskId,
+            { status },
+            { new: true },
         )
 
-        if(!updatedTask){ 
-            return res.status(404).json({message: "Task Not Found"}); 
+        if (!updatedTask) {
+            return res.status(404).json({ message: "Task Not Found" });
         }
 
-        return res.status(200).json({ 
-            message: "Task Updated Successfully", 
+        return res.status(200).json({
+            message: "Task Updated Successfully",
             data: updatedTask
         })
-    }catch(e){ 
-        return res.status(500).json({message: e.message}); 
+    } catch (e) {
+        return res.status(500).json({ message: e.message });
     }
 }
 
-async function deleteById(req, res) { 
-    try{ 
-        const {taskId} = req.query; 
-        const deletedTask = await Task.findByIdAndDelete(taskId); 
-        if(!deletedTask){ 
-            return res.status(404).json({message: "Task not found"}); 
+async function deleteById(req, res) {
+    try {
+        const { taskId } = req.query;
+        const deletedTask = await Task.findByIdAndDelete(taskId);
+        if (!deletedTask) {
+            return res.status(404).json({ message: "Task not found" });
         }
 
-        return res.status(200).json({ 
-            message: "Task Deleted Successfully", 
-            data:  deletedTask,
-        }); 
-    }catch(e){ 
+        return res.status(200).json({
+            message: "Task Deleted Successfully",
+            data: deletedTask,
+        });
+    } catch (e) {
+        return res.status(500).json({ message: e.message });
+    }
+}
+
+
+async function getStatusInspector(req, res) {
+    try {
+        const token = req.headers.authorization?.split(" ")[1];
+        // console.log(token, "this is token"); 
+        if (!token) {
+            return res.status(401).json({ message: "No token provided" });
+        }
+
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // console.log(decoded.user.id)
+        const userId= decoded.user.id;
+
+        if (!userId) {
+            return res.status(401).json({ message: "Invalid token" });
+        }
+
+        const task = await Task.find({ userId: userId }); 
+
+
+        if(!task || task.length === 0){ 
+            return res.status(404).json({message: "No Tasks Found"})
+        }
+
+        const statusCounts = task.reduce((acc, task) => {
+            acc[task.status] = (acc[task.status] || 0) + 1;
+            return acc;
+        }, {});
+
+
+        return res.status(200).json({message: "Status Counts", data: statusCounts}); 
+
+    } catch (e) {
+        return res.status(500).json({message: e.message}); 
+    }
+}
+
+async function getStatusSupervisor(req, res) {
+    try {
+        const token = req.headers.authorization?.split(" ")[1];
+        // console.log(token, "this is token"); 
+        if (!token) {
+            return res.status(401).json({ message: "No token provided" });
+        }
+
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // console.log(decoded.user.id)
+        const supervisorId = decoded.user.id;
+
+        if (!supervisorId) {
+            return res.status(401).json({ message: "Invalid token" });
+        }
+
+        const task = await Task.find({ supervisorId: supervisorId }); 
+
+        
+
+        if(!task || task.length === 0){ 
+            return res.status(404).json({message: "No Tasks Found"})
+        }
+
+        const statusCounts = task.reduce((acc, task) => {
+            acc[task.status] = (acc[task.status] || 0) + 1;
+            return acc;
+        }, {});
+
+
+        return res.status(200).json({message: "Status Counts", data: statusCounts}); 
+
+    } catch (e) {
         return res.status(500).json({message: e.message}); 
     }
 }
 
 
-module.exports = { createTask, getTasks, changeStatus, assignedTask, deleteById }; 
+module.exports = { createTask, getTasks, changeStatus, assignedTask, deleteById, getStatusInspector, getStatusSupervisor }; 
