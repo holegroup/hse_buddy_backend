@@ -212,7 +212,28 @@ async function getStatusInspector(req, res) {
             return res.status(401).json({ message: "Invalid token" });
         }
 
-        const task = await Task.find({ userId: userId }); 
+        const { startDate, endDate } = req.query;
+
+        // Convert startDate and endDate to Date objects if they are provided
+        let query = { userId: userId };
+
+        if (startDate || endDate) {
+            query.due_date = {}; 
+
+            if (startDate) {
+                query.due_date.$gte = new Date(startDate); 
+            }
+
+            if (endDate) {
+                query.due_date.$lte = new Date(endDate); 
+            }
+        }
+
+      
+        const task = await Task.find(query);
+
+
+        // const task = await Task.find({ userId: userId }); 
 
 
         if(!task || task.length === 0){ 
@@ -250,7 +271,28 @@ async function getStatusSupervisor(req, res) {
             return res.status(401).json({ message: "Invalid token" });
         }
 
-        const task = await Task.find({ supervisorId: supervisorId }); 
+
+        const { startDate, endDate } = req.query;
+
+        
+        let query = { supervisorId: supervisorId  };
+
+        if (startDate || endDate) {
+            query.due_date = {}; 
+
+            if (startDate) {
+                query.due_date.$gte = new Date(startDate); 
+            }
+
+            if (endDate) {
+                query.due_date.$lte = new Date(endDate); 
+            }
+        }
+
+        console.log(query)
+        const task = await Task.find(query);
+
+        // const task = await Task.find({ supervisorId: supervisorId }); 
 
         
 
