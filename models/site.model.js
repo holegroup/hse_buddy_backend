@@ -13,19 +13,23 @@ const siteSchema = mongoose.Schema({
         country: { type: String, required: true },
         zip_code: { type: String, required: true }
     },
-    manager: {
-        name: { type: String, required: true },
-        contact: { type: String, required: true },
-        email: { type: String, required: true }
-    },
-    storage_capacity: {
-        type: Number, // Can represent square footage or volume capacity
-        required: true
-    },
+    // storage_capacity: {
+    //     type: Number, // Can represent square footage or volume capacity
+    //     required: true
+    // },
     products_stored: [
         {
             product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-            quantity: { type: Number, default: 0 }
+            items: [
+                { 
+                    serial_number: { type: String }, 
+                    parts: [
+                        {
+                          part_number: { type: String },
+                        }
+                      ]
+                }
+            ],
         }
     ]
 }, { 
