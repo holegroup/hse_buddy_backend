@@ -209,9 +209,35 @@ async function editProfile(req, res){
 //      }
 // }
 
+async function validateSuperAdmin(req, res) { 
+    try{ 
+        const token = req.headers.authorization?.split(' ')[1]; 
+        if(!token){ 
+            return res.status(401).json({message: 'Access Denied: No Token Provided', isValid: false}); 
+        }
+        // verifying the token 
+        const decoded = jwt.verify(token, process.env.JWT_SECRET); 
+        
 
+        // fetch user
+        const user = await User.findById(decoded.user.id); 
+        if(!user){ 
+            return res.status(404).json({message: 'User Not Found', isValid: false}); 
+        }
 
-module.exports = {login, createUser, searchUser, editProfile}; 
+        // check if super admin
+        if(user.role !== 'superadmin'){ 
+            return res.status(403).json({message: 'Access Demied: Insufficiant Permisson', isValid: false}); 
+        }
+
+        return res.status(200).json({message: "Success", isValid: true}); 
+
+    }catch(e){ 
+        return res.status(500).json({message: e.message, isValid: false}); 
+    }
+}
+
+module.exports = {login, createUser, searchUser, editProfile, validateSuperAdmin}; 
 
 
 
