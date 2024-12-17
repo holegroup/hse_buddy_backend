@@ -237,7 +237,44 @@ async function validateSuperAdmin(req, res) {
     }
 }
 
-module.exports = {login, createUser, searchUser, editProfile, validateSuperAdmin}; 
+async function getAllSupervisors(__, res){ 
+    try{ 
+        const supervisors = await User.find({ role: 'supervisor' }).select('-password'); 
+        if(supervisors.length === 0){ 
+            return res.status(404).json({messgae: "No Supervisors Found"}); 
+        }
+
+        return res.status(200).json({ 
+            message: "Supervisors", 
+            data: supervisors, 
+        })
+    }catch(e){ 
+        return res.status(500).json({ 
+            message: e.message
+        })
+    }
+}; 
+
+async function getAllInspectors(__, res){ 
+    try{ 
+        const inspectors = await User.find({ role: 'inspector' }).select('-password'); 
+        if(inspectors.length === 0){ 
+            return res.status(404).json({messgae: "No Supervisors Found"}); 
+        }
+
+        return res.status(200).json({ 
+            message: "Supervisors", 
+            data: inspectors, 
+        })
+    }catch(e){ 
+        return res.status(500).json({ 
+            message: e.message
+        })
+    }
+}; 
+
+
+module.exports = {login, createUser, searchUser, editProfile, validateSuperAdmin, getAllSupervisors, getAllInspectors}; 
 
 
 
