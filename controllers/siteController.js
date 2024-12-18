@@ -188,13 +188,13 @@ async function fetchProducts(req, res) {
           .select('items.name items.serial_number equip_name _id')
           .exec();
 
-        console.log('Searching for item with serial number:', item.serial_number);
-        console.log('Product details found:', productDetails);
+        // console.log('Searching for item with serial number:', item.serial_number);
+        // console.log('Product details found:', productDetails);
 
         if (productDetails) {
           // Find the specific item within the product to get its name
           const matchedItem = productDetails.items.find(i => i.serial_number === item.serial_number);
-          console.log(matchedItem, "This is matched item");
+          // console.log(matchedItem, "This is matched item");
 
           // Add the item to the corresponding equipment category
           const equipName = productDetails.equip_name;
