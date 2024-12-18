@@ -220,7 +220,7 @@ async function fetchProducts(req, res) {
     const result = Object.keys(productsByEquip).map(equipName => ({ 
       equip_name: equipName,
       product_id: productsByEquip[equipName].product_id,
-      data: productsByEquip[equipName].items
+      items: productsByEquip[equipName].items
     }));
 
     // Return the items with their names
