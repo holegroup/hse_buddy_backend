@@ -185,7 +185,7 @@ async function fetchProducts(req, res) {
       // For each item, find the corresponding product in the Product collection
       for (const item of product.items) {
         const productDetails = await Product.findOne({ 'items.serial_number': item.serial_number })
-          .select('items.name items.serial_number equip_name _id')
+          .select('items.name items.serial_number equip_name _id items.parts')
           .exec();
 
         // console.log('Searching for item with serial number:', item.serial_number);
@@ -210,7 +210,14 @@ async function fetchProducts(req, res) {
             serial_number: item.serial_number,
             name: matchedItem ? matchedItem.name : 'Unknown',
             _id: item._id,
-            parts: item.parts
+            // parts: item.parts
+            parts: matchedItem
+              ? matchedItem.parts.map(part => ({
+                  part_name: part.part_name,
+                  part_number: part.part_number,
+                  _id: part._id,
+                }))
+              : []
           });
         }
       }
