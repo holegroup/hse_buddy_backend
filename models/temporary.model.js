@@ -16,7 +16,7 @@ const TempItemSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    item_name: {
+    name: {
         type: String,
         required: true
     },

@@ -353,32 +353,6 @@ async function fetchAllTempItems(__, res) {
 }
 
 
-// async function fetchAllTempParts(__, res) {
-//   try {
-//     const tempParts = await TempPart.find().populate({ path: "productId", select: "equip_name" }).populate({ path: "added_by", select: "name" });
-//     const product = await Product.findById(part.productId);
-//     const result = await Promise.all(tempParts.map(async (part) => {
-//       // Find the product for each part
-//       const product = await Product.findById(part.productId);
-
-//       console.log(part.itemId, "part");
-
-//       // Find the item that matches the itemId in the TempPart schema
-//       const item = product.items.find(item => item._id.toString() === part.itemId.toString());
-
-//       return {
-//         ...part.toObject(),
-//         item_name: item ? item.name : null // Add item_name if item is found
-//       };
-//     }));
-
-//     return res.status(200).json({ data: result });
-//     // return res.status(200).json({ data: tempParts });
-//   } catch (e) {
-//     return res.status(500).json({ message: e.message });
-//   }
-// }
-
 async function fetchAllTempParts(__, res) {
   try {
     const tempParts = await TempPart.find().populate({ path: "productId", select: "equip_name" }).populate({ path: "added_by", select: "name" });
