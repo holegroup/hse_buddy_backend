@@ -255,20 +255,11 @@ async function getStatusInspector(req, res) {
 
 async function getStatusSupervisor(req, res) {
     try {
-        const token = req.headers.authorization?.split(" ")[1];
-        // console.log(token, "this is token"); 
-        if (!token) {
-            return res.status(401).json({ message: "No token provided" });
-        }
+        const { supervisorId } = req.query; // Get supervisorId from query params
 
-
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        // console.log(decoded.user.id)
-        const supervisorId = decoded.user.id;
-
+        // Check if supervisorId is provided in the query params
         if (!supervisorId) {
-            return res.status(401).json({ message: "Invalid token" });
+            return res.status(401).json({ message: "No supervisorId provided" });
         }
 
 
