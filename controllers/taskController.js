@@ -196,17 +196,18 @@ async function deleteById(req, res) {
 
 async function getStatusInspector(req, res) {
     try {
-        const token = req.headers.authorization?.split(" ")[1];
-        // console.log(token, "this is token"); 
-        if (!token) {
-            return res.status(401).json({ message: "No token provided" });
-        }
+        // const token = req.headers.authorization?.split(" ")[1];
+        // // console.log(token, "this is token"); 
+        // if (!token) {
+        //     return res.status(401).json({ message: "No token provided" });
+        // }
 
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        // const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        // console.log(decoded.user.id)
-        const userId= decoded.user.id;
+        // // console.log(decoded.user.id)
+        // const userId= decoded.user.id;
+        const { userId } = req.query;
 
         if (!userId) {
             return res.status(401).json({ message: "Invalid token" });
@@ -304,5 +305,48 @@ async function getStatusSupervisor(req, res) {
     }
 }
 
+// async function getTaskById(req, res){ 
+//     try{ 
+//         const {userId} = req.query; 
+//         if(!userId){ 
+//             return res.status(400).json({message: "TaskId is required"}); 
+//         }
 
-module.exports = { createTask, getTasks, changeStatus, assignedTask, deleteById, getStatusInspector, getStatusSupervisor }; 
+//         const task = await Task.findById(userId);
+//         if(!task){ 
+//             return res.status(404).json({message: "Task Not Found"}); 
+//         }
+//         return res.status(200).json({message: "Task Found", data: task});
+//     }
+//     catch(e){ 
+//         return res.status(500).json({message: e.message});
+//     }
+// }
+
+async function getTaskById(req, res) {
+    try {
+        const { userId, supervisorId } = req.query;
+
+        if (!userId && !supervisorId) {
+            return res.status(400).json({ message: "Either userId or supervisorId is required" });
+        }
+
+        const query = {
+            $or: [{ userId }, { supervisorId }],
+        };
+
+        const task = await Task.find(query).populate("inspectionForms");
+
+        if (!task) {
+            return res.status(404).json({ message: "Task Not Found" });
+        }
+
+        return res.status(200).json({ message: "Task Found", data: task });
+    } catch (e) {
+        return res.status(500).json({ message: e.message });
+    }
+}
+
+
+
+module.exports = { createTask, getTasks, changeStatus, assignedTask, deleteById, getStatusInspector, getStatusSupervisor, getTaskById }; 
