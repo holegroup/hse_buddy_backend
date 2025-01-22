@@ -43,8 +43,11 @@ const taskSchema = mongoose.Schema(
     }, 
     inspectionForms: [
       {type: mongoose.Schema.Types.ObjectId,  ref: "Inspection"}, 
-     
     ] , 
+    critical: { 
+      type: Boolean, 
+      default: false,
+    }
   },
   {
     timestamps: true,

@@ -5,7 +5,7 @@ require("dotenv").config();
 
 async function createTask(req, res) {
     try {
-        const { inspector_name, email, product, part_number, due_date, note } = req.body;
+        const { inspector_name, email, product, part_number, due_date, note, critical } = req.body;
         const token = req.headers.authorization?.split(" ")[1];
         // console.log(token, "this is token"); 
         if (!token) {
@@ -40,6 +40,7 @@ async function createTask(req, res) {
             note,
             userId,
             supervisorId,
+            critical
         })
 
         const savedTask = await newTask.save();
