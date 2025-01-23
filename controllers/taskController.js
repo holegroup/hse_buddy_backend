@@ -101,6 +101,28 @@ async function getTasks(req, res) {
     }
 }
 
+async function getTaskDateStatus(__, res){ 
+    try{ 
+        const tasks = await Task.find({ 
+            status: { $ne: "Completed" },
+        }); 
+        const formattedTasks = tasks.map(task => { 
+            const dueDate = new Date(task.due_date); 
+            dueDate.setHours(0,0,0,0); 
+
+
+
+
+            return `${dueDate.toISOString().split("T")[0].replace(/-/g, ".")}: ${task.status}`;
+
+        });
+        return res.status(200).json({message: "Tasks With Due Date and Status", data: formattedTasks}); 
+
+    }catch(e){ 
+        return res.status(500).json({message: e.message}); 
+    }
+}
+
 
 async function assignedTask(req, res) {
     try {
@@ -355,4 +377,4 @@ async function getTaskById(req, res) {
 
 
 
-module.exports = { createTask, getTasks, changeStatus, assignedTask, deleteById, getStatusInspector, getStatusSupervisor, getTaskById }; 
+module.exports = { createTask, getTasks, changeStatus, assignedTask, deleteById, getStatusInspector, getStatusSupervisor, getTaskById, getTaskDateStatus }; 
