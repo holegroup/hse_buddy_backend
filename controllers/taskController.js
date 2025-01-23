@@ -79,7 +79,7 @@ async function getTasks(req, res) {
 
 
         // const tasks = await Task.find({ userId: userId });
-        const tasks = await Task.find({ userId: userId }).skip(skip).limit(limit).sort({ due_date: 1 });
+        const tasks = await Task.find({ userId: userId }).skip(skip).limit(limit).sort({ due_date: -1 });
 
 
         const totalTasks = await Task.countDocuments({ userId: userId });
@@ -347,6 +347,11 @@ async function getTaskById(req, res) {
         return res.status(500).json({ message: e.message });
     }
 }
+
+// 2025.01.24: Over Due
+// 2025.01.25: Due
+// 2025.01.26: Due
+// 2025.01.27: Due
 
 
 
