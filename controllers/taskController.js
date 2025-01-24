@@ -5,7 +5,7 @@ require("dotenv").config();
 
 async function createTask(req, res) {
     try {
-        const { inspector_name, email, product, part_number, due_date, note, critical } = req.body;
+        const { inspector_name, email, product, part_number, due_date, note, critical, maintenance_freq, recurring } = req.body;
         const token = req.headers.authorization?.split(" ")[1];
         // console.log(token, "this is token"); 
         if (!token) {
@@ -40,7 +40,9 @@ async function createTask(req, res) {
             note,
             userId,
             supervisorId,
-            critical
+            critical, 
+            maintenance_freq, 
+            recurring
         })
 
         const savedTask = await newTask.save();
@@ -397,11 +399,35 @@ async function getTaskById(req, res) {
     }
 }
 
-// 2025.01.24: Over Due
-// 2025.01.25: Due
-// 2025.01.26: Due
-// 2025.01.27: Due
+async function fetchAllRecuringTasks(__, res){ 
+    try{ 
+        const tasks = await Task.find({recurring: true});
+        return res.status(200).json({message: "Recurring Tasks", data: tasks});
+    }catch(e){ 
+        return res.status(500).json({message: e.message}); 
+    }
+}
+
+async function changeRecurringStatusById(req, res){ 
+    try{ 
+        const {taskId, status} = req.query;
+        if(!taskId){ 
+            return res.status(400).json({message: "TaskId is required"}); 
+        }
+        if(!status && typeof status !== "boolean"){ 
+            return res.status(400).json({message: "Status is required"}); 
+        }
+
+        const task = await Task.findByIdAndUpdate(taskId, {recurring: status}, {new: true}); 
+        if(!task){ 
+            return res.status(404).json({message: "Task Not Found"}); 
+        }
+        return res.status(200).json({message: "Task Recurring Status Changed", data: task});
+    } catch(e){ 
+        return res.status(500).json({message: e.message}); 
+    }
+}
 
 
 
-module.exports = { createTask, getTasks, changeStatus, assignedTask, deleteById, getStatusInspector, getStatusSupervisor, getTaskById, getTaskDateStatus }; 
+module.exports = { createTask, getTasks, changeStatus, assignedTask, deleteById, getStatusInspector, getStatusSupervisor, getTaskById, getTaskDateStatus, fetchAllRecuringTasks, changeRecurringStatusById }; 

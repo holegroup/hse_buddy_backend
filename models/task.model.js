@@ -14,8 +14,8 @@ const taskSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    part_number: { 
-      type: String, 
+    part_number: {
+      type: String,
       required: true,
     },
     due_date: {
@@ -28,24 +28,33 @@ const taskSchema = mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Pending", "Due Soon", "Overdue", "Completed"], 
-      default: "Pending", 
+      enum: ["Pending", "Due Soon", "Overdue", "Completed"],
+      default: "Pending",
     },
     userId: {
-      type: mongoose.Schema.Types.ObjectId, 
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "User",
     },
     supervisorId: {
-      type: mongoose.Schema.Types.ObjectId, 
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "User",
-    }, 
+    },
     inspectionForms: [
-      {type: mongoose.Schema.Types.ObjectId,  ref: "Inspection"}, 
-    ] , 
-    critical: { 
-      type: Boolean, 
+      { type: mongoose.Schema.Types.ObjectId, ref: "Inspection" },
+    ],
+    critical: {
+      type: Boolean,
+      default: false,
+    },
+    maintenance_freq: {
+      type: Number, // in days
+      default: null,
+      // required: true
+    },
+    recurring: { 
+      type: Boolean,
       default: false,
     }
   },
