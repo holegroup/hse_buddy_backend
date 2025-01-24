@@ -101,25 +101,52 @@ async function getTasks(req, res) {
     }
 }
 
-async function getTaskDateStatus(__, res){ 
-    try{ 
-        const tasks = await Task.find({ 
-            status: { $ne: "Completed" },
-        }); 
-        const formattedTasks = tasks.map(task => { 
-            const dueDate = new Date(task.due_date); 
-            dueDate.setHours(0,0,0,0); 
+async function getTaskDateStatus(req, res) {
+    try {
+        const token = req.headers.authorization?.split(" ")[1];
+        // console.log(token, "this is token"); 
+        if (!token) {
+            return res.status(401).json({ message: "No token provided" });
+        }
+
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        const id = decoded.user.id;
+       
+
+        // checking for the user role 
+        const user = await User.findById(id);
+        if(!user){ 
+            return res.status(404).json({message: "User not found"}); 
+        }
+
+        // setting the id based on role and calling the data
+        let query = { status: {$ne: "Completed"}}; 
+ 
+        if(user.role === "inspector"){ 
+           query.userId = id;
+        }else if(user.role === "supervisor"){ 
+            query.supervisorId = id; 
+        }
+
+       const tasks = await Task.find(query);
 
 
 
+        // formatting the task based on front end requirement
+        const formattedTasks = tasks.map(task => {
+            const dueDate = new Date(task.due_date);
+            dueDate.setHours(0, 0, 0, 0);
 
             return `${dueDate.toISOString().split("T")[0].replace(/-/g, ".")}: ${task.status}`;
 
         });
-        return res.status(200).json({message: "Tasks With Due Date and Status", data: formattedTasks}); 
 
-    }catch(e){ 
-        return res.status(500).json({message: e.message}); 
+        return res.status(200).json({ message: "Tasks With Due Date and Status", data: formattedTasks });
+
+    } catch (e) {
+        return res.status(500).json({ message: e.message });
     }
 }
 
@@ -242,26 +269,26 @@ async function getStatusInspector(req, res) {
         let query = { userId: userId };
 
         if (startDate || endDate) {
-            query.due_date = {}; 
+            query.due_date = {};
 
             if (startDate) {
-                query.due_date.$gte = new Date(startDate); 
+                query.due_date.$gte = new Date(startDate);
             }
 
             if (endDate) {
-                query.due_date.$lte = new Date(endDate); 
+                query.due_date.$lte = new Date(endDate);
             }
         }
 
-      
+
         const task = await Task.find(query);
 
 
         // const task = await Task.find({ userId: userId }); 
 
 
-        if(!task || task.length === 0){ 
-            return res.status(404).json({message: "No Tasks Found"})
+        if (!task || task.length === 0) {
+            return res.status(404).json({ message: "No Tasks Found" })
         }
 
         const statusCounts = task.reduce((acc, task) => {
@@ -270,10 +297,10 @@ async function getStatusInspector(req, res) {
         }, {});
 
 
-        return res.status(200).json({message: "Status Counts", data: statusCounts}); 
+        return res.status(200).json({ message: "Status Counts", data: statusCounts });
 
     } catch (e) {
-        return res.status(500).json({message: e.message}); 
+        return res.status(500).json({ message: e.message });
     }
 }
 
@@ -289,18 +316,18 @@ async function getStatusSupervisor(req, res) {
 
         const { startDate, endDate } = req.query;
 
-        
-        let query = { supervisorId: supervisorId  };
+
+        let query = { supervisorId: supervisorId };
 
         if (startDate || endDate) {
-            query.due_date = {}; 
+            query.due_date = {};
 
             if (startDate) {
-                query.due_date.$gte = new Date(startDate); 
+                query.due_date.$gte = new Date(startDate);
             }
 
             if (endDate) {
-                query.due_date.$lte = new Date(endDate); 
+                query.due_date.$lte = new Date(endDate);
             }
         }
 
@@ -309,10 +336,10 @@ async function getStatusSupervisor(req, res) {
 
         // const task = await Task.find({ supervisorId: supervisorId }); 
 
-        
 
-        if(!task || task.length === 0){ 
-            return res.status(404).json({message: "No Tasks Found"})
+
+        if (!task || task.length === 0) {
+            return res.status(404).json({ message: "No Tasks Found" })
         }
 
         const statusCounts = task.reduce((acc, task) => {
@@ -321,10 +348,10 @@ async function getStatusSupervisor(req, res) {
         }, {});
 
 
-        return res.status(200).json({message: "Status Counts", data: statusCounts}); 
+        return res.status(200).json({ message: "Status Counts", data: statusCounts });
 
     } catch (e) {
-        return res.status(500).json({message: e.message}); 
+        return res.status(500).json({ message: e.message });
     }
 }
 
