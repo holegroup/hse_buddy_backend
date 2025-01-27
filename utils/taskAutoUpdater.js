@@ -44,9 +44,20 @@ async function handleRecurringTask() {
 
         // setting the new due date for the new task
         for (let task of recurringTasks) {
-            const newDueDate = new Date(task.due_date);
-            newDueDate.setDate(newDueDate.getDate() + task.maintenance_freq);
+            let newDueDate = new Date(task.due_date);
 
+            // Hnadle month transition
+            const monthsToAdd = Math.floor(task.maintenance_freq / 30); 
+            const remainingDays = task.maintenance_freq % 30;
+
+            // setting thr new due date
+            newDueDate.setMonth(newDueDate.getMonth() + monthsToAdd); 
+            newDueDate.setDate(newDueDate.getDate() + remainingDays); 
+
+            // handleing the overflow cases (eg. feb 30 will become march 2)
+            if(newDueDate.getDate() !== (task.due_date.getDate() + remainingDays)){ 
+                newDueDate.setDate(0); 
+            }; 
 
             // creating a new task 
             const newTask = new Task({
@@ -71,7 +82,7 @@ async function handleRecurringTask() {
         }
 
     } catch (e) {
-        console.log(e.message);
+        console.log(`Error in recurring task handler: ${e.message}`);
     }
 }
 
