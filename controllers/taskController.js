@@ -1,7 +1,9 @@
+
 const Task = require("../models/task.model");
 const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
+let converter = require("json-2-csv"); 
 
 async function createTask(req, res) {
     try {
@@ -54,6 +56,68 @@ async function createTask(req, res) {
     }
 }
 
+async function getAllTasks(req, res){ 
+    try{ 
+        const {startDate, endDate} = req.query; 
+        let query = {};
+        if(startDate || endDate){ 
+            query.due_date = {}; 
+            if(startDate){ 
+                query.due_date.$gte = new Date(startDate); 
+            }
+            if(endDate){ 
+                query.due_date.$lte = new Date(endDate); 
+            }
+        } 
+        // console.log(query);
+        const tasks = await Task.find(query); 
+        if(!tasks || tasks.length === 0){ 
+            return res.status(404).json({message: "No Tasks Found"}); 
+        }
+        return res.status(200).json({message: "All Tasks", count: tasks.length, data: tasks });
+    }catch(e){ 
+        return res.status(500).json({message: e.message}); 
+    }
+}
+async function getAllTasksCsv(req, res){ 
+    try{ 
+        const {startDate, endDate} = req.query; 
+        let query = {};
+        if(startDate || endDate){ 
+            query.due_date = {}; 
+            if(startDate){ 
+                query.due_date.$gte = new Date(startDate); 
+            }
+            if(endDate){ 
+                query.due_date.$lte = new Date(endDate); 
+            }
+        } 
+        // console.log(query);
+        const tasks = await Task.find(query); 
+        if(!tasks || tasks.length === 0){ 
+            return res.status(404).json({message: "No Tasks Found"}); 
+        }
+
+        // generating csv data
+        const fields = ["Product", "Part_Number", "Assigned_To", "Status", "Due_Date"]; 
+        const filteredTasks = tasks.map((task) => { 
+            return{ 
+                Product: task.product, 
+                Part_Number: task.part_number, 
+                Assigned_To: task.inspector_name, 
+                Status: task.status, 
+                Due_Date: task.due_date.toISOString()
+            }
+        }); 
+
+        const csv = converter.json2csv(filteredTasks, fields); 
+        res.setHeader("Content-Type", "text/csv");
+        res.setHeader("Content-Disposition", `attachment; filename=${startDate}_to_${endDate}.csv`);
+        return res.send(csv); 
+    }catch(e){ 
+        return res.status(500).json({message: e.message}); 
+    }
+}
 
 async function getTasks(req, res) {
     try {
@@ -430,4 +494,4 @@ async function changeRecurringStatusById(req, res){
 
 
 
-module.exports = { createTask, getTasks, changeStatus, assignedTask, deleteById, getStatusInspector, getStatusSupervisor, getTaskById, getTaskDateStatus, fetchAllRecuringTasks, changeRecurringStatusById }; 
+module.exports = { createTask, getTasks, changeStatus, assignedTask, deleteById, getStatusInspector, getStatusSupervisor, getTaskById, getTaskDateStatus, fetchAllRecuringTasks, changeRecurringStatusById, getAllTasks, getAllTasksCsv }; 
