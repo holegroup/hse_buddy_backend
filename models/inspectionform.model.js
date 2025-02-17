@@ -21,10 +21,10 @@ const inspectionFormSchema = mongoose.Schema({
         type: String,
         required: true,
     },
-    maintenance_freq: {
-        type: Number, // in days
-        required: true
-    },
+    // maintenance_freq: {
+    //     type: Number, // in days
+    //     required: true
+    // },
     equip_desc: {
         type: String,
         required: true

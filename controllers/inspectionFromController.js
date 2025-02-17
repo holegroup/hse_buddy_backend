@@ -15,7 +15,7 @@ cloudinary.config({
 
 async function createInspectionForm(req, res){ 
     try{ 
-        const { equip_name_look, date_manufacture, part_num, serial_num, maintenance_freq, equip_desc, location, lat, long, taskId} = req.body;  
+        const { equip_name_look, date_manufacture, part_num, serial_num,  equip_desc, location, lat, long, taskId} = req.body;  
         const pictureUrls = [];
 
         // const samePartNumber = await InspectionForm.findOne({part_num}); 
@@ -35,11 +35,17 @@ async function createInspectionForm(req, res){
                 
                 console.log(file)
                 cloudinary.uploader.upload_stream(
-                    {folder: "inspections"}, 
+                    {
+                        folder: "inspections", 
+                        quality: "auto:good",  
+                        fetch_format: "auto",  
+                        width: 1024,           
+                        crop: "limit"
+                    }, 
                     (error, result) => { 
                         if(error) reject(error); 
                         else resolve(result); 
-                        console.log(result)
+                        // console.log(result)
                     },
                 ).end(file.buffer); 
             }); 
@@ -52,7 +58,7 @@ async function createInspectionForm(req, res){
             date_manufacture,
             part_num,
             serial_num,
-            maintenance_freq,
+            // maintenance_freq,
             equip_desc,
             picture: pictureUrls, 
             location, 
