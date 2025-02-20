@@ -13,6 +13,7 @@ const inspectionFormRoutes = require("./routes/inspectionFormRoutes");
 const productRoutes = require("./routes/productRoutes");
 const siteRoutes = require("./routes/siteRoute");
 const taskRoutes = require("./routes/taskRoutes");
+const sseRoutes = require('./routes/sseRoutes'); 
 
 // cors
 const cors = require("cors");
@@ -46,6 +47,9 @@ app.use("/api/sites", siteRoutes);
 
 // task routes
 app.use("/api/tasks", taskRoutes);
+
+// sse routes
+app.use("/api/sse", sseRoutes); 
 
 
 // job scheduling (update task status)
