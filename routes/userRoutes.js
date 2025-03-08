@@ -1,7 +1,7 @@
 const express = require("express"); 
 router = express.Router(); 
 const multer = require("multer");
-const {login, createUser, searchUser, editProfile, validateSuperAdmin, getAllInspectors, getAllSupervisors} = require("../controllers/userController"); 
+const {login, createUser, searchUser, editProfile, validateSuperAdmin, getAllInspectors, getAllSupervisors, editPassTemp} = require("../controllers/userController"); 
 const {authMiddleware,superAdminMiddleware} = require("../middlewares/authMiddleware"); 
 
 const storage = multer.memoryStorage(); 
