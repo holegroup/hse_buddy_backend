@@ -4,6 +4,7 @@ const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 let converter = require("json-2-csv"); 
+const { sendEvent } = require("./sseController");
 
 async function createTask(req, res) {
     try {
@@ -48,11 +49,21 @@ async function createTask(req, res) {
         })
 
         const savedTask = await newTask.save();
+        // sending sse notification upon task creation
+        // sendEvent({message: `New Task Created (Due: ${due_date.toDateString()})`, email: email}, null, res);
+        sendEvent({ 
+            message: `New Task Created (Due: ${new Date(due_date).toLocaleDateString("en-US", { 
+                year: "numeric", 
+                month: "long", 
+                day: "numeric" 
+            })})`, 
+            email: email 
+        }, null, res);
 
         res.status(201).json({ message: "Task created successfully.", task: savedTask });
     }
     catch (e) {
-        res.status(500).json({ message: "An error occurred while creating the task.", error: error.message });
+        res.status(500).json({ message: "An error occurred while creating the task.", e: e.message });
     }
 }
 
